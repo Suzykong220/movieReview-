@@ -12,11 +12,8 @@
 //                   2. The number and type of parameters of the functions.
 //                   3. Return type of the functions.
 ////////////////////////////////////////////////////////////////////////////////
-
 #include "a4.hpp"
-
 #include "trim.hpp"
-
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -38,49 +35,41 @@ void cleanData(std::ifstream &inFile, std::ofstream &outFile,
 	// Do the following operations on each review before
 	// storing it to the output file:
 	//   1. Replace hyphens with spaces.
-
-	vector<string> v;
-	vector<string> words;    // initializing???
-	ofstream outputFile("cleanReviewRatings.txt");
+	vector<string> v;  // the vector that is used to store ratings from file
+	vector<string> words;
+	vector<string> vv;// initializing???
 	if (inFile.is_open()){
 		string line;
 		// check if the file has next line
-		while (inFile.peek() != EOF){
+		while (inFile.peek()!=EOF){
 			getline(inFile,line);
 			// append the line into the vector
 			v.push_back(line);
 		}
-
+		vector<string> newVec;
 		for (int i = 0; i < v.size(); ++i){
 			replaceHyphensWithSpaces(v[i]);
 			//   2. Split the line of text into individual words.
-			splitLine(v[i], words);
+			splitLine(v[i], newVec);
 		}
 		//   3. Remove the punctuation marks from the words.
 		vector<string> vv;
-		removePunctuation(v,vv);
-		for (int i = 0; i < vv.size(); i++){
-			cout << vv[i] <<"\n";
-		}
+		removePunctuation(newVec,vv);
 		//   4. Remove the trailing and the leading whitespaces in each word.
 		removeWhiteSpaces(vv);
-		for (int i = 0; i < vv.size(); i++){
-			cout << vv[i] <<"\n";
-		}
 		//   5. Remove the empty words.
 		removeEmptyWords(vv);
 		//   6. Remove words with just one character in them. You should NOT remove
 		//      numbers in this step because if you do so, you'll lose the ratings.
 		removeSingleLetterWords(vv);
-
 		//   7. Remove stopwords.
 		removeStopWords(vv,stopwords);
 		for (int i = 0; i < vv.size(); i++){
-			cout << vv[i] <<"\n";
-		}
+			cout << vv[i] << "\n";
+			outFile << vv[i] << endl;
 	}
 }
-
+}
 void fillDictionary(std::ifstream &newInFile,
 		std::unordered_map<std::string, std::pair<long, long>> &dict) {
 	// TODO: Implement this method.
@@ -101,7 +90,6 @@ void fillDictionary(std::ifstream &newInFile,
 					(*word).second.second++;
 					(*word).second.first += num;
 				}
-
 			}
 		}
 	}
@@ -116,7 +104,6 @@ void fillStopWords(std::ifstream &inFile,
 	}
 }
 
-
 void rateReviews(std::ifstream &testFile,
 		std::unordered_map<std::string, std::pair<long, long> > &dict,
 		std::ofstream &ratingsFile) {
@@ -125,7 +112,7 @@ void rateReviews(std::ifstream &testFile,
 	string line;
 	while (testFile.peek()!=EOF){
 		getline(testFile,line);
-		long rate = 0;
+		double rate = 0;
 		if (line.length()==0){
 			rate = 2;
 		}
@@ -147,10 +134,9 @@ void rateReviews(std::ifstream &testFile,
 			}
 			rate = rate / count;
 		}
-		ratingsFile << rate << endl;
+		ratingsFile << fixed << setprecision(2) << rate << endl;
 	}
 }
-
 void removeEmptyWords(std::vector<std::string> &tokens) {
 	// TODO: Implement this method.
 	// approximate # of lines of code in Gerald's implementation: < 5
@@ -181,23 +167,26 @@ void removePunctuation(std::vector<std::string> &inTokens,
 void removeSingleLetterWords(std::vector<std::string> &tokens) {
 	// TODO: Implement this method.
 	// approximate # of lines of code in Gerald's implementation: < 5
-	for (auto it = tokens.begin(); it != tokens.end(); ++it){
-		if ((*it).length()==1){
-			remove(tokens.begin(),tokens.end(),(*it));
+	for (int i = 0; i < tokens.size(); i++) {
+		if (tokens[i].length() == 1){
+			if ((tokens[i].find_first_not_of( "0123456789" ) == string::npos) == false) {
+				tokens.erase(tokens.begin()+i);
+				--i;
+			}
+
 		}
 	}
 }
+
 void removeStopWords(std::vector<std::string> &tokens,
 		std::unordered_set<std::string> &stopwords) {
 	// TODO: Implement this method.
 	// approximate # of lines of code in Gerald's implementation: < 5
-	for (auto it = tokens.begin(); it != tokens.end(); ++it){
-		//for (auto it2 = stopwords.begin(); it2 != stopwords.end(); ++it2){
-		if (stopwords.find(*it) != stopwords.end()){ // this word has found in stopwords list before it iterates to the end
-			tokens.erase(remove(tokens.begin(),tokens.end(),(*it)), tokens.end());
-		}
-	}
+		auto lambda_func = [stopwords](string word){return stopwords.find(word)!= stopwords.end();};
+		// this word has found in stopwords list before it iterates to the end
+			tokens.erase(remove_if(tokens.begin(),tokens.end(),lambda_func), tokens.end());
 }
+
 void removeWhiteSpaces(std::vector<std::string> &tokens) {
 	// TODO: Implement this method.
 	// approximate # of lines of code in Gerald's implementation: < 5
@@ -215,15 +204,14 @@ void replaceHyphensWithSpaces(std::string &line) {
 void splitLine(std::string &line, std::vector<std::string> &words) {
 	// TODO: Implement this method.
 	// approximate # of lines of code in Gerald's implementation: < 10
-	int i = 0;
-	char delimit = ' ';       // Why i have to use *????????
-	int pos = line.find(delimit);
-	while (pos != string::npos){
-		words.push_back(line.substr(i,pos-i));
-		i = pos++;
-		pos = line.find(delimit,pos);
-		if (pos == string::npos){
-			words.push_back(line.substr(i, line.length()));
-		}
+	char delim = ' ';
+	stringstream ss(line);
+	string item;
+	vector<string> tokens;
+	while (getline(ss, item, delim)) {
+		words.push_back(item);
 	}
 }
+
+	
+	
