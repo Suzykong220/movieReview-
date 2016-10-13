@@ -1,17 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
-// File Name:      a2.cpp
-//
-// Author:         Gerald
-// CS email:       gerald@cs.wisc.edu
-//
-// Description:    The source file for a2.
-//
-// IMPORTANT NOTE: THIS IS THE ONLY FILE THAT YOU SHOULD MODIFY FOR A2.
-//                 You SHOULD NOT MODIFY any of the following:
-//                   1. Name of the functions/methods.
-//                   2. The number and type of parameters of the functions.
-//                   3. Return type of the functions.
-////////////////////////////////////////////////////////////////////////////////
+
 #include "a4.hpp"
 #include "trim.hpp"
 #include <algorithm>
